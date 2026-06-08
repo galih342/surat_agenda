@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Providers;
-
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -19,6 +19,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        // Paksa link menjadi HTTPS jika diakses lewat Ngrok atau di server production
+        if (str_contains(request()->getHost(), 'ngrok') || env('APP_ENV') === 'production') {
+            URL::forceScheme('https');
+        }
     }
 }
