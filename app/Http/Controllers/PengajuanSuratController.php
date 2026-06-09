@@ -9,50 +9,113 @@ class PengajuanSuratController extends Controller
 {
     public function store(Request $request)
     {
-        // Validasi input
+        // 1. Validasi Input Array (Perhatikan penambahan bintang * untuk validasi array)
         $request->validate([
             'nama_opd' => 'required|string|max:255',
-            'perihal' => 'required|string|max:255',
-            'tanggal_acara' => 'required|date|after_or_equal:today',
-            'jam_mulai' => 'required|date_format:H:i',
-            'jam_selesai' => 'nullable|required_without:sampai_selesai|date_format:H:i',
-            'surat' => 'required|mimes:pdf|max:2048',
+            'perihal' => 'required|array',
+            'perihal.*' => 'required|string|max:255',
+            'tanggal_acara' => 'required|array',
+            'tanggal_acara.*' => 'required|date|after_or_equal:today',
+            'jam_mulai' => 'required|array',
+            'jam_mulai.*' => 'required|date_format:H:i',
+            'jam_selesai' => 'nullable|array',
+            'sampai_selesai_hidden' => 'nullable|array',
+            'surat' => 'required|array',
+            'surat.*' => 'required|mimes:pdf|max:2048',
         ]);
 
-        // Upload file surat ke folder storage/app/public/dokumen_surat
-        // Ambil file aslinya
-        $file = $request->file('surat');
-        // Buat nama baru: format timestamp_nama-asli-file.pdf
-        $namaFile = time() . '_' . $file->getClientOriginalName();
-        // Simpan menggunakan storeAs() agar namanya tidak di-hash acak
-        $filePath = $file->storeAs('dokumen_surat', $namaFile, 'public');
+        $emailPengirim = session('google_email');
+        $jumlahSurat = count($request->perihal);
 
-        // Simpan data ke database
-        // Simpan data ke database dan tampung ke variabel $pengajuan
-        $pengajuan = PengajuanSurat::create([
-            'nama_opd' => $request->nama_opd,
-            'perihal' => $request->perihal,
-            'tanggal_acara' => $request->tanggal_acara,
-            'jam_mulai' => $request->jam_mulai,
-            'jam_selesai' => $request->has('sampai_selesai') ? null : $request->jam_selesai,
-            'file_surat' => $filePath,
-        ]);
+        // 2. Looping dan Simpan Setiap Surat
+        for ($i = 0; $i < $jumlahSurat; $i++) {
+            // Cek apakah opsi "Sampai Selesai" dicentang pada kotak surat ini
+            $isSampaiSelesai = isset($request->sampai_selesai_hidden[$i]) && $request->sampai_selesai_hidden[$i] == '1';
 
-        // Redirect ke route status real-time dengan membawa ID surat yang baru dibuat
-        return redirect()->route('pengajuan.status', $pengajuan->id);
+            // Upload file surat ke folder storage/app/public/dokumen_surat
+            $file = $request->file('surat')[$i];
+            // Tambahkan uniqid() biar kalau upload banyak file bersamaan, namanya nggak bentrok
+            $namaFile = time() . '_' . uniqid() . '_' . $file->getClientOriginalName();
+            $filePath = $file->storeAs('dokumen_surat', $namaFile, 'public');
+
+            // Simpan data ke database
+            PengajuanSurat::create([
+                'nama_opd' => $request->nama_opd,
+                'email_pengirim' => $emailPengirim,
+                'perihal' => $request->perihal[$i],
+                'tanggal_acara' => $request->tanggal_acara[$i],
+                'jam_mulai' => $request->jam_mulai[$i],
+                'jam_selesai' => $isSampaiSelesai ? null : ($request->jam_selesai[$i] ?? null),
+                'file_surat' => $filePath,
+                'status' => 'menunggu',
+            ]);
+        }
+
+        // 3. Eksekusi Kematian Token QR
+        $currentToken = session('current_qr_token');
+        if ($currentToken) {
+            \App\Models\QrToken::where('token', $currentToken)->update([
+                'status' => 'USED',
+                'used_by_email' => $emailPengirim
+            ]);
+            // Hapus session token agar bersih
+            session()->forget('current_qr_token');
+        }
+
+        // 4. Redirect ke rute status dengan membawa parameter email
+        return redirect()->route('surat.status', ['email' => $emailPengirim])
+            ->with('success', 'Berhasil mengirim ' . $jumlahSurat . ' dokumen agenda!');
     }
 
-    public function status($id)
+    // Fungsi Status diubah menjadi berbasis Email
+    public function status(Request $request)
     {
-        $surat = \App\Models\PengajuanSurat::findOrFail($id);
-        return view('status', compact('surat'));
+        // Ambil email dari URL
+        $emailDiUrl = $request->query('email');
+        // Ambil email asli dari Sesi Login Google
+        $emailSesi = session('google_email');
+
+        // PROTEKSI: Jika email di URL tidak sama dengan email yang sedang login, tendang!
+        if (!$emailSesi || $emailDiUrl !== $emailSesi) {
+            abort(403, 'Anda tidak diizinkan untuk melihat status surat milik akun lain.');
+        }
+
+        $surats = \App\Models\PengajuanSurat::where('email_pengirim', $emailSesi)->latest()->get();
+
+        return view('status', compact('surats', 'emailSesi'));
     }
 
-    public function checkStatus($id)
+    // Fungsi Check Status (AJAX Realtime) juga diubah berbasis Email
+    public function checkStatus(Request $request)
     {
-        $surat = \App\Models\PengajuanSurat::findOrFail($id);
-        // Hanya kembalikan data status dalam bentuk JSON
-        return response()->json(['status' => $surat->status]);
+        $email = $request->query('email') ?? session('google_email');
+
+        // Ambil ID dan status terbaru dari semua surat milik email ini
+        $surats = \App\Models\PengajuanSurat::where('email_pengirim', $email)->get(['id', 'status']);
+
+        return response()->json(['surats' => $surats]);
+    }
+
+    public function form()
+    {
+        // Pagar Betis 1: Wajib memiliki Token QR di Session dan Wajib ada Email Google
+        $token = session('current_qr_token');
+        $email = session('google_email');
+
+        if (!$token || !$email) {
+            abort(403, 'AKSES DITOLAK: Anda wajib memindai QR Code resmi dan melakukan autentikasi Google untuk mengakses formulir ini.');
+        }
+
+        // Pagar Betis 2: Pastikan token tersebut statusnya memang masih ACTIVE di database
+        $qr = \App\Models\QrToken::where('token', $token)->first();
+
+        if (!$qr || $qr->status !== 'ACTIVE') {
+            return redirect()->route('surat.status', ['email' => $email])
+                ->with('error', 'QR Code sudah kedaluwarsa atau telah digunakan.');
+        }
+
+        // Jika lolos semua pengamanan, baru tampilkan form welcome
+        return view('welcome');
     }
 
     // Fungsi Terima Massal

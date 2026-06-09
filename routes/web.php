@@ -5,20 +5,24 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\AdminController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\GoogleController;
+use App\Http\Controllers\QrAccessController;
 
 /*
 |--------------------------------------------------------------------------
 | AREA PUBLIK (Bisa diakses siapa saja tanpa login)
 |--------------------------------------------------------------------------
 */
-Route::get('/', function () {
-    return view('welcome');
-});
+// Root langsung mental ke halaman login pengelola
+Route::redirect('/', '/login');
 
-// Form Pengajuan & Cek Status (Untuk Masyarakat)
+// Form Pengajuan (Hanya bisa diakses jika lolos validasi QR & Google)
+Route::get('/form-pengajuan', [PengajuanSuratController::class, 'form'])->name('surat.form');
 Route::post('/simpan-surat', [PengajuanSuratController::class, 'store']);
-Route::get('/pengajuan/status/{id}', [PengajuanSuratController::class, 'status'])->name('pengajuan.status');
-Route::get('/pengajuan/status/{id}/check', [PengajuanSuratController::class, 'checkStatus']);
+
+// Cek Status (Berdasarkan Email Google)
+Route::get('/pengajuan/status', [PengajuanSuratController::class, 'status'])->name('surat.status');
+Route::get('/pengajuan/status/check', [PengajuanSuratController::class, 'checkStatus']);
 
 
 /*
@@ -85,6 +89,21 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     });
 
+    // Tambahkan ini di dalam kelompok rute super-admin web.php
+Route::post('/dashboard/qr/generate', [DashboardController::class, 'generateQr'])->name('surat.qr-generate');
+
 });
 
+/*
+|--------------------------------------------------------------------------
+| AREA Google Auth/redir/qr akses
+|--------------------------------------------------------------------------
+*/
+//qr akses
+Route::get('/akses-surat', [QrAccessController::class, 'scan'])->name('qr.scan');
+//Google Auth
+Route::get('/auth/google', [GoogleController::class, 'redirectToGoogle'])->name('google.login');
+Route::get('/auth/google/callback', [GoogleController::class, 'handleGoogleCallback']);
+//redir
+Route::redirect('/register', '/login');
 require __DIR__ . '/auth.php';

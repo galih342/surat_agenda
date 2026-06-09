@@ -184,4 +184,21 @@ class DashboardController extends Controller
 
         return redirect()->back()->with('success', 'Data telah dihapus secara permanen.');
     }
+
+    public function generateQr()
+    {
+        // Membuat string token unik acak berstempel waktu
+        $tokenStr = 'OPD-' . strtoupper(bin2hex(random_bytes(4))) . '-' . time();
+
+        // Simpan token baru ke database dengan status ACTIVE
+        \App\Models\QrToken::create([
+            'token' => $tokenStr,
+            'status' => 'ACTIVE'
+        ]);
+
+        // Kirim url mentah hasil generate kembali ke halaman admin
+        $linkHasilScan = route('qr.scan', ['token' => $tokenStr]);
+
+        return back()->with('success_qr', $linkHasilScan);
+    }
 }

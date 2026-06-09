@@ -1,11 +1,13 @@
 <x-app-layout>
-    <!-- Container Utama: Background soft abu-abu ala Applify -->
-    <div class="flex h-screen overflow-hidden bg-slate-50 dark:bg-gray-900 font-sans">
+    <div x-data="{ sidebarOpen: false, filterOpen: false, qrModalOpen: {{ session()->has('success_qr') ? 'true' : 'false' }} }" class="flex h-screen overflow-hidden bg-slate-50 dark:bg-gray-900 font-sans">
 
-        <!-- Sidebar Modern -->
-        <aside
-            class="w-64 bg-white dark:bg-gray-800 border-r border-gray-100 dark:border-gray-700 hidden md:flex flex-col flex-shrink-0 z-20 shadow-[4px_0_24px_rgba(0,0,0,0.02)]">
-            <!-- Area Logo -->
+        <div x-show="sidebarOpen" x-transition.opacity @click="sidebarOpen = false"
+            class="fixed inset-0 bg-slate-900/60 z-20 md:hidden" style="display: none;">
+        </div>
+
+        <aside :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'"
+            class="fixed inset-y-0 left-0 w-64 bg-white dark:bg-gray-800 border-r border-slate-200 dark:border-gray-700 flex flex-col flex-shrink-0 z-30 shadow-[4px_0_24px_rgba(0,0,0,0.02)] md:relative md:translate-x-0 transition-transform duration-300">
+
             <div class="bg-slate-900 px-6 pt-8 pb-6 border-b-4 border-amber-500 text-center flex-shrink-0">
                 <img src="{{ asset('images/icon.png') }}" alt="Logo Instansi"
                     class="w-12 h-12 mx-auto mb-2 object-contain">
@@ -14,21 +16,19 @@
                 <h2 class="text-white text-sm font-extrabold uppercase tracking-widest mt-1">DUMMY NAME</h2>
             </div>
 
-            <!-- Navigasi Menu -->
             <nav class="flex-1 overflow-y-auto mt-2 px-4 space-y-1" x-data="{
                 activeTab: localStorage.getItem('activeTabAdmin') || 'utama'
             }" x-init="setTimeout(() => switchTab(activeTab), 50)">
 
+                <p class="px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-3 mt-4">Menu Utama</p>
 
-                <p class="px-4 text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-3 mt-4">Menu Utama</p>
-
-                <button @click="activeTab = 'utama'; switchTab('utama')"
+                <button @click="activeTab = 'utama'; switchTab('utama'); sidebarOpen = false"
                     :class="activeTab === 'utama' ?
                         'bg-slate-100 text-slate-900 border-l-4 border-slate-800 font-bold dark:bg-slate-800 dark:text-white dark:border-slate-400' :
-                        'text-gray-500 hover:bg-gray-50 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-gray-700'"
-                    class="flex items-center w-full px-4 py-3 rounded-md font-semibold transition-all duration-200 group">
+                        'text-slate-500 hover:bg-slate-50 hover:text-slate-700 dark:text-gray-400 dark:hover:bg-gray-700'"
+                    class="flex items-center w-full px-4 py-3 rounded-r-md font-semibold transition-all duration-200 group">
                     <svg class="w-5 h-5 mr-3 transition-colors"
-                        :class="activeTab === 'utama' ? 'text-indigo-600' : 'text-gray-400 group-hover:text-gray-500'"
+                        :class="activeTab === 'utama' ? 'text-slate-800' : 'text-slate-400 group-hover:text-slate-500'"
                         fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M4 6h16M4 10h16M4 14h16M4 18h16"></path>
@@ -36,13 +36,13 @@
                     Tabel Utama
                 </button>
 
-                <button @click="activeTab = 'diterima'; switchTab('diterima')"
+                <button @click="activeTab = 'diterima'; switchTab('diterima'); sidebarOpen = false"
                     :class="activeTab === 'diterima' ?
                         'bg-slate-100 text-slate-900 border-l-4 border-slate-800 font-bold dark:bg-slate-800 dark:text-white dark:border-slate-400' :
-                        'text-gray-500 hover:bg-gray-50 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-gray-700'"
-                    class="flex items-center w-full px-4 py-3 rounded-md font-semibold transition-all duration-200 group mt-1">
+                        'text-slate-500 hover:bg-slate-50 hover:text-slate-700 dark:text-gray-400 dark:hover:bg-gray-700'"
+                    class="flex items-center w-full px-4 py-3 rounded-r-md font-semibold transition-all duration-200 group mt-1">
                     <svg class="w-5 h-5 mr-3 transition-colors"
-                        :class="activeTab === 'diterima' ? 'text-indigo-600' : 'text-gray-400 group-hover:text-gray-500'"
+                        :class="activeTab === 'diterima' ? 'text-slate-800' : 'text-slate-400 group-hover:text-slate-500'"
                         fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
@@ -50,13 +50,13 @@
                     Jadwal Diterima
                 </button>
 
-                <button @click="activeTab = 'ditolak'; switchTab('ditolak')"
+                <button @click="activeTab = 'ditolak'; switchTab('ditolak'); sidebarOpen = false"
                     :class="activeTab === 'ditolak' ?
                         'bg-slate-100 text-slate-900 border-l-4 border-slate-800 font-bold dark:bg-slate-800 dark:text-white dark:border-slate-400' :
-                        'text-gray-500 hover:bg-gray-50 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-gray-700'"
-                    class="flex items-center w-full px-4 py-3 rounded-md font-semibold transition-all duration-200 group mt-1">
+                        'text-slate-500 hover:bg-slate-50 hover:text-slate-700 dark:text-gray-400 dark:hover:bg-gray-700'"
+                    class="flex items-center w-full px-4 py-3 rounded-r-md font-semibold transition-all duration-200 group mt-1">
                     <svg class="w-5 h-5 mr-3 transition-colors"
-                        :class="activeTab === 'ditolak' ? 'text-indigo-600' : 'text-gray-400 group-hover:text-gray-500'"
+                        :class="activeTab === 'ditolak' ? 'text-slate-800' : 'text-slate-400 group-hover:text-slate-500'"
                         fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
@@ -64,30 +64,29 @@
                     Surat Ditolak
                 </button>
 
-                <!-- Menu Riwayat Agenda (Tadi belum masuk) -->
-                <p class="px-4 text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-3 mt-6">Riwayat Agenda
+                <p class="px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-3 mt-6">Riwayat Agenda
                 </p>
 
-                <button @click="activeTab = 'selesai'; switchTab('selesai')"
+                <button @click="activeTab = 'selesai'; switchTab('selesai'); sidebarOpen = false"
                     :class="activeTab === 'selesai' ?
                         'bg-slate-100 text-slate-900 border-l-4 border-slate-800 font-bold dark:bg-slate-800 dark:text-white dark:border-slate-400' :
-                        'text-gray-500 hover:bg-gray-50 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-gray-700'"
-                    class="flex items-center w-full px-4 py-3 rounded-md font-semibold transition-all duration-200 group">
+                        'text-slate-500 hover:bg-slate-50 hover:text-slate-700 dark:text-gray-400 dark:hover:bg-gray-700'"
+                    class="flex items-center w-full px-4 py-3 rounded-r-md font-semibold transition-all duration-200 group">
                     <svg class="w-5 h-5 mr-3 transition-colors"
-                        :class="activeTab === 'selesai' ? 'text-indigo-600' : 'text-gray-400 group-hover:text-gray-500'"
+                        :class="activeTab === 'selesai' ? 'text-slate-800' : 'text-slate-400 group-hover:text-slate-500'"
                         fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                     </svg>
                     Agenda Selesai
                 </button>
 
-                <button @click="activeTab = 'batal'; switchTab('batal')"
+                <button @click="activeTab = 'batal'; switchTab('batal'); sidebarOpen = false"
                     :class="activeTab === 'batal' ?
                         'bg-slate-100 text-slate-900 border-l-4 border-slate-800 font-bold dark:bg-slate-800 dark:text-white dark:border-slate-400' :
-                        'text-gray-500 hover:bg-gray-50 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-gray-700'"
-                    class="flex items-center w-full px-4 py-3 rounded-md font-semibold transition-all duration-200 group mt-1">
+                        'text-slate-500 hover:bg-slate-50 hover:text-slate-700 dark:text-gray-400 dark:hover:bg-gray-700'"
+                    class="flex items-center w-full px-4 py-3 rounded-r-md font-semibold transition-all duration-200 group mt-1">
                     <svg class="w-5 h-5 mr-3 transition-colors"
-                        :class="activeTab === 'batal' ? 'text-indigo-600' : 'text-gray-400 group-hover:text-gray-500'"
+                        :class="activeTab === 'batal' ? 'text-slate-800' : 'text-slate-400 group-hover:text-slate-500'"
                         fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636">
@@ -96,17 +95,16 @@
                     Agenda Dibatalkan
                 </button>
 
-
                 @role('super-admin')
-                    <p class="px-4 text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-3 mt-6">Pengaturan</p>
+                    <p class="px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-3 mt-6">Pengaturan</p>
 
-                    <button @click="activeTab = 'akun'; switchTab('akun')"
+                    <button @click="activeTab = 'akun'; switchTab('akun'); sidebarOpen = false"
                         :class="activeTab === 'akun' ?
                             'bg-slate-100 text-slate-900 border-l-4 border-slate-800 font-bold dark:bg-slate-800 dark:text-white dark:border-slate-400' :
-                            'text-gray-500 hover:bg-gray-50 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-gray-700'"
-                        class="flex items-center w-full px-4 py-3 rounded-md font-semibold transition-all duration-200 group">
+                            'text-slate-500 hover:bg-slate-50 hover:text-slate-700 dark:text-gray-400 dark:hover:bg-gray-700'"
+                        class="flex items-center w-full px-4 py-3 rounded-r-md font-semibold transition-all duration-200 group">
                         <svg class="w-5 h-5 mr-3 transition-colors"
-                            :class="activeTab === 'akun' ? 'text-indigo-600' : 'text-gray-400 group-hover:text-gray-500'"
+                            :class="activeTab === 'akun' ? 'text-slate-800' : 'text-slate-400 group-hover:text-slate-500'"
                             fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z">
@@ -117,12 +115,12 @@
 
                     <p class="px-4 text-[11px] font-bold text-rose-400 uppercase tracking-wider mb-3 mt-6">Tong Sampah</p>
 
-                    <button @click="activeTab = 'sampah'; switchTab('sampah')"
+                    <button @click="activeTab = 'sampah'; switchTab('sampah'); sidebarOpen = false"
                         :class="activeTab === 'sampah' ? 'bg-rose-50 text-rose-700 dark:bg-rose-900/30 dark:text-rose-400' :
                             'bg-slate-100 text-slate-900 border-l-4 border-slate-800 font-bold dark:bg-slate-800 dark:text-white dark:border-slate-400'"
-                        class="flex items-center w-full px-4 py-3 rounded-md font-semibold transition-all duration-200 group">
+                        class="flex items-center w-full px-4 py-3 rounded-r-md font-semibold transition-all duration-200 group mb-6">
                         <svg class="w-5 h-5 mr-3 transition-colors"
-                            :class="activeTab === 'sampah' ? 'text-rose-600' : 'text-gray-400 group-hover:text-gray-500'"
+                            :class="activeTab === 'sampah' ? 'text-rose-600' : 'text-slate-400 group-hover:text-slate-500'"
                             fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16">
@@ -134,32 +132,25 @@
             </nav>
         </aside>
 
-        <!-- Main Content (Scrollable) -->
-        <main class="flex-1 flex flex-col h-screen overflow-x-hidden overflow-y-auto">
+        <main class="flex-1 flex flex-col h-screen overflow-x-hidden overflow-y-auto bg-slate-50 dark:bg-gray-900">
 
-            <!-- Pengganti Header bawaan Breeze (Lebih bersih) -->
-            <header class="h-24 flex items-center justify-between px-8 sm:px-10 z-10 flex-shrink-0">
+            <header
+                class="h-20 sm:h-24 flex items-center justify-between px-4 sm:px-10 z-10 flex-shrink-0 bg-white dark:bg-gray-900 sm:bg-transparent sm:dark:bg-transparent border-b border-slate-200 dark:border-gray-700 sm:border-none">
                 <style>
-                    /* Memaksa scrollbar melayang di atas konten (Overlay Trick) */
                     main.overflow-y-auto {
                         overflow-y: auto;
                         overflow-y: overlay;
-                        /* Webkit spesifik untuk overlay */
                     }
 
-                    /* Desain Scrollbar Global Overlay (Lebih tipis & transparan) */
                     ::-webkit-scrollbar {
                         width: 5px;
-                        /* Sangat tipis */
                         height: 8px;
-                        /* Tinggi scrollbar horizontal (tabel) */
                     }
 
                     ::-webkit-scrollbar-track {
                         background: transparent;
                     }
 
-                    /* Thumb menggunakan RGBA agar sedikit transparan saat menimpa konten */
                     ::-webkit-scrollbar-thumb {
                         background-color: rgba(203, 213, 225, 0.6);
                         border-radius: 10px;
@@ -169,7 +160,6 @@
                         background-color: rgba(148, 163, 184, 0.9);
                     }
 
-                    /* Tema Dark Mode */
                     .dark ::-webkit-scrollbar-thumb {
                         background-color: rgba(71, 85, 105, 0.6);
                     }
@@ -178,16 +168,24 @@
                         background-color: rgba(100, 116, 139, 0.9);
                     }
                 </style>
+
                 <div class="flex items-center gap-3">
-                    <!-- Aksen Garis Emas Khas e-Gov -->
-                    <div class="w-1.5 h-8 bg-amber-500 rounded-sm"></div>
+                    <button @click="sidebarOpen = true"
+                        class="md:hidden p-2 -ml-2 text-slate-600 hover:bg-slate-100 rounded-md focus:outline-none transition-colors">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M4 6h16M4 12h16M4 18h16"></path>
+                        </svg>
+                    </button>
+
+                    <div class="hidden sm:block w-1.5 h-8 bg-amber-500 rounded-sm"></div>
                     <div>
                         <h1
-                            class="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-white uppercase tracking-wider">
+                            class="text-lg sm:text-2xl font-extrabold text-slate-900 dark:text-white uppercase tracking-wider leading-none">
                             Dashboard</h1>
                         <p
-                            class="text-[11px] sm:text-xs font-bold text-slate-500 dark:text-slate-400 mt-1 flex items-center gap-1.5 uppercase tracking-wide">
-                            <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor"
+                            class="text-[10px] sm:text-xs font-bold text-slate-500 dark:text-slate-400 mt-1 flex items-center gap-1.5 uppercase tracking-wide">
+                            <svg class="w-3 h-3 sm:w-4 sm:h-4 text-slate-400" fill="none" stroke="currentColor"
                                 viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z">
@@ -198,10 +196,102 @@
                     </div>
                 </div>
 
-                <div class="flex items-center gap-4">
+                <div x-show="qrModalOpen" style="display: none;" class="fixed inset-0 z-50 overflow-y-auto"
+                    aria-labelledby="modal-title" role="dialog" aria-modal="true">
+                    <div
+                        class="flex items-end justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+                        <div x-show="qrModalOpen" x-transition.opacity @click="qrModalOpen = false"
+                            class="fixed inset-0 transition-opacity bg-slate-900/75 dark:bg-gray-900/90"
+                            aria-hidden="true">
+                        </div>
 
-                    <!-- Info Nama & Role (Tampil di Desktop) -->
-                    <div class="text-right hidden sm:block">
+                        <span class="hidden sm:inline-block sm:align-middle sm:h-screen"
+                            aria-hidden="true">&#8203;</span>
+
+                        <div x-show="qrModalOpen" x-transition.scale
+                            class="relative z-10 inline-block px-4 pt-5 pb-4 overflow-hidden text-left align-bottom transition-all transform bg-white dark:bg-gray-800 rounded-xl shadow-2xl sm:my-8 sm:align-middle sm:max-w-md sm:w-full sm:p-6 border border-slate-200 dark:border-gray-700">
+                            <div class="absolute top-0 right-0 pt-4 pr-4">
+                                <button @click="qrModalOpen = false" type="button"
+                                    class="text-slate-400 bg-white dark:bg-gray-800 rounded-md hover:text-slate-500 focus:outline-none transition-colors">
+                                    <span class="sr-only">Tutup</span>
+                                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M6 18L18 6M6 6l12 12"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                            <div class="sm:flex sm:items-start">
+                                <div
+                                    class="flex items-center justify-center flex-shrink-0 w-12 h-12 mx-auto bg-emerald-100 dark:bg-emerald-900/30 rounded-full sm:mx-0 sm:h-10 sm:w-10">
+                                    <svg class="w-5 h-5 text-emerald-600 dark:text-emerald-400" fill="none"
+                                        stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M12 4v16m8-8H4"></path>
+                                    </svg>
+                                </div>
+                                <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
+                                    <h3 class="text-lg font-bold leading-6 text-slate-900 dark:text-white uppercase tracking-wide"
+                                        id="modal-title">Akses Portal Surat</h3>
+                                    <div class="mt-2">
+                                        <p class="text-xs font-medium text-slate-500 dark:text-gray-400">Buat QR Code
+                                            dan
+                                            tautan sekali pakai untuk diberikan kepada instansi yang ingin mengajukan
+                                            surat
+                                            baru.</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mt-5 sm:mt-6 border-t border-slate-100 dark:border-gray-700 pt-5">
+                                <form action="{{ route('surat.qr-generate') }}" method="POST">
+                                    @csrf
+                                    <button type="submit"
+                                        class="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-xs font-extrabold uppercase tracking-widest text-white bg-slate-900 hover:bg-slate-800 dark:bg-emerald-600 dark:hover:bg-emerald-500 transition-colors">
+                                        Generate QR Baru
+                                    </button>
+                                </form>
+
+                                @if (session('success_qr'))
+                                    <div
+                                        class="mt-6 p-5 bg-slate-50 dark:bg-gray-900 border border-slate-200 dark:border-gray-700 rounded-lg flex flex-col items-center justify-center text-center shadow-inner">
+                                        <span
+                                            class="text-[9px] font-black text-emerald-700 dark:text-emerald-400 uppercase tracking-widest bg-emerald-100 dark:bg-emerald-900/50 px-2 py-1 rounded border border-emerald-200 dark:border-emerald-800 mb-4 shadow-sm">Siap
+                                            Digunakan</span>
+
+                                        <div class="p-3 bg-white rounded-md shadow-sm border border-slate-200">
+                                            <img src="https://api.qrserver.com/v1/create-qr-code/?size=160x160&data={{ urlencode(session('success_qr')) }}"
+                                                alt="QR Code Link" class="w-32 h-32 object-contain">
+                                        </div>
+
+                                        <p
+                                            class="text-slate-500 dark:text-gray-400 text-[10px] font-bold uppercase tracking-wider mt-5 mb-2">
+                                            Tautan Alternatif (Klik untuk Salin):</p>
+                                        <input type="text" readonly value="{{ session('success_qr') }}"
+                                            onclick="this.select(); document.execCommand('copy'); alert('Link disalin!');"
+                                            class="w-full text-[11px] font-semibold text-slate-600 dark:text-gray-300 bg-white dark:bg-gray-800 border border-slate-300 dark:border-gray-600 rounded text-center focus:ring-0 p-2.5 cursor-pointer shadow-sm hover:border-emerald-400 transition-colors"
+                                            title="Klik untuk menyalin">
+                                    </div>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-4 sm:gap-6">
+
+                    @role('super-admin')
+                        <button @click="qrModalOpen = true"
+                            class="flex items-center gap-2 px-3 py-2 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800 rounded-md hover:bg-emerald-100 dark:hover:bg-emerald-900/50 transition-colors shadow-sm focus:outline-none">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4">
+                                </path>
+                            </svg>
+                            <span class="text-xs font-bold uppercase tracking-wider hidden sm:block">Akses QR</span>
+                        </button>
+                    @endrole
+
+                    <div
+                        class="text-right hidden sm:block border-l border-slate-200 dark:border-gray-700 pl-4 sm:pl-6">
                         <p
                             class="text-sm font-bold text-slate-900 dark:text-white leading-tight uppercase tracking-wide">
                             {{ auth()->user()->name }}
@@ -213,10 +303,10 @@
                     </div>
 
                     <div x-data="{ openProfile: false }" class="relative">
-                        <!-- Tombol Profil Berubah Menjadi Kotak Formal (Rounded-md) -->
                         <button @click="openProfile = !openProfile" @click.away="openProfile = false"
-                            class="flex items-center justify-center w-10 h-10 rounded-md bg-white text-slate-600 hover:bg-slate-50 border border-slate-200 shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-slate-500/30 cursor-pointer dark:bg-slate-800 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-700">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            class="flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 rounded-md bg-white sm:bg-slate-50 text-slate-600 hover:bg-slate-100 border border-slate-200 shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-slate-500/30 cursor-pointer dark:bg-slate-800 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-700">
+                            <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor"
+                                viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
                             </svg>
@@ -225,7 +315,6 @@
                         <div x-show="openProfile" x-transition.origin.top.right style="display: none;"
                             class="absolute right-0 mt-3 w-48 bg-white dark:bg-slate-800 rounded-md shadow-lg border border-slate-200 dark:border-slate-700 overflow-hidden z-50">
 
-                            <!-- Info Nama & Role (Muncul di Mobile saat dropdown dibuka) -->
                             <div
                                 class="block sm:hidden px-4 py-3 border-b border-slate-100 dark:border-slate-700/50 bg-slate-50 dark:bg-slate-800/50">
                                 <p
@@ -255,65 +344,84 @@
                 </div>
             </header>
 
-            <!-- Wrapper Konten Utama -->
-            <div class="flex-1 px-8 sm:px-10 pb-10 w-full max-w-7xl mx-auto">
-                <form action="{{ url()->current() }}" method="GET"
-                    class="mb-6 bg-white dark:bg-gray-800 p-4 rounded-sm border border-gray-50 dark:border-gray-700/50 shadow-sm border border-slate-200 flex flex-col md:flex-row gap-4 items-end transition-all">
-                    <div class="flex-1 w-full">
-                        <label for="search"
-                            class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1.5 ml-1">Cari
-                            Data</label>
-                        <div class="relative group">
-                            <div
-                                class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none transition-colors group-focus-within:text-indigo-500">
-                                <svg class="w-5 h-5 text-gray-400 group-focus-within:text-indigo-500 transition-colors"
-                                    fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                                </svg>
-                            </div>
-                            <input type="text" name="search" id="search" value="{{ request('search') }}"
-                                placeholder="Ketik nama OPD atau perihal surat..."
-                                class="w-full pl-11 pr-4 py-2.5 bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600 rounded-md text-gray-700 dark:text-gray-300 focus:ring-2 focus:ring-slate-500/20 focus:border-slate-500 transition-all font-medium text-sm placeholder-gray-400">
-                        </div>
-                    </div>
+            <div class="flex-1 px-4 sm:px-10 pb-10 pt-4 sm:pt-0 w-full max-w-7xl mx-auto">
 
-                    <div class="w-full md:w-56">
-                        <label for="tanggal"
-                            class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1.5 ml-1">Filter
-                            Tanggal Acara</label>
-                        <input type="date" name="tanggal" id="tanggal" value="{{ request('tanggal') }}"
-                            class="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600 rounded-md text-gray-700 dark:text-gray-300 focus:ring-2 focus:ring-slate-500/20 focus:border-slate-500 transition-all font-medium text-sm cursor-pointer">
-                    </div>
+                <div
+                    class="mb-6 bg-white dark:bg-gray-800 rounded-md border border-slate-200 dark:border-gray-700 shadow-sm transition-all overflow-hidden">
 
-                    <div class="flex items-center gap-3 w-full md:w-auto">
-                        <button type="submit"
-                            class="w-full md:w-auto px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm rounded-md shadow-sm transition-all cursor-pointer flex items-center justify-center gap-2">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <button type="button" @click="filterOpen = !filterOpen"
+                        class="w-full md:hidden px-4 py-3 flex items-center justify-between bg-slate-50 border-b border-slate-200 text-slate-700">
+                        <div class="flex items-center gap-2">
+                            <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor"
+                                viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z">
                                 </path>
                             </svg>
-                            Terapkan
-                        </button>
+                            <span class="text-xs font-bold uppercase tracking-wider">Filter & Pencarian</span>
+                        </div>
+                        <svg :class="filterOpen ? 'rotate-180' : ''"
+                            class="w-4 h-4 text-slate-500 transition-transform" fill="none" stroke="currentColor"
+                            viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7">
+                            </path>
+                        </svg>
+                    </button>
 
-                        @if (request('search') || request('tanggal'))
-                            <a href="{{ route('dashboard') }}"
-                                class="w-full md:w-auto px-4 py-2.5 bg-rose-50 hover:bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:hover:bg-rose-900/50 dark:text-rose-400 font-bold text-sm rounded-md border border-rose-200 dark:border-rose-800 transition-all text-center flex items-center justify-center gap-2">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15">
-                                    </path>
-                                </svg>
-                                Reset
-                            </a>
-                        @endif
-                    </div>
-                </form>
-                <!-- Container Card Tabel (Rounded 3xl & borderless look) -->
+                    <form action="{{ url()->current() }}" method="GET"
+                        :class="filterOpen ? 'flex' : 'hidden md:flex'"
+                        class="p-4 flex-col md:flex-row gap-4 items-end bg-white dark:bg-gray-800">
+
+                        <div class="flex-1 w-full">
+                            <label for="search"
+                                class="block text-[10px] sm:text-xs font-bold text-slate-500 dark:text-gray-400 uppercase tracking-wider mb-1.5 ml-1">Cari
+                                Data</label>
+                            <div class="relative group">
+                                <div
+                                    class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none transition-colors group-focus-within:text-slate-600">
+                                    <svg class="w-4 h-4 text-slate-400 group-focus-within:text-slate-600 transition-colors"
+                                        fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                                    </svg>
+                                </div>
+                                <input type="text" name="search" id="search" value="{{ request('search') }}"
+                                    placeholder="Ketik nama instansi atau perihal..."
+                                    class="w-full pl-10 pr-4 py-2 bg-slate-50 dark:bg-gray-700/50 border border-slate-200 dark:border-gray-600 rounded-md text-slate-800 dark:text-gray-300 focus:ring-2 focus:ring-slate-500/20 focus:border-slate-500 transition-all font-medium text-sm placeholder-slate-400">
+                            </div>
+                        </div>
+
+                        <div class="w-full md:w-52">
+                            <label for="tanggal"
+                                class="block text-[10px] sm:text-xs font-bold text-slate-500 dark:text-gray-400 uppercase tracking-wider mb-1.5 ml-1">Filter
+                                Tanggal</label>
+                            <input type="date" name="tanggal" id="tanggal" value="{{ request('tanggal') }}"
+                                class="w-full px-3 py-2 bg-slate-50 dark:bg-gray-700/50 border border-slate-200 dark:border-gray-600 rounded-md text-slate-800 dark:text-gray-300 focus:ring-2 focus:ring-slate-500/20 focus:border-slate-500 transition-all font-medium text-sm cursor-pointer">
+                        </div>
+
+                        <div class="flex items-center gap-2 w-full md:w-auto">
+                            <button type="submit"
+                                class="flex-1 md:flex-none px-5 py-2 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs uppercase tracking-wider rounded-md shadow-sm transition-all cursor-pointer flex items-center justify-center gap-2">
+                                Terapkan
+                            </button>
+
+                            @if (request('search') || request('tanggal'))
+                                <a href="{{ route('dashboard') }}"
+                                    class="px-4 py-2 bg-rose-50 hover:bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:hover:bg-rose-900/50 dark:text-rose-400 font-bold text-xs uppercase tracking-wider rounded-md border border-rose-200 dark:border-rose-800 transition-all text-center flex items-center justify-center gap-2">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15">
+                                        </path>
+                                    </svg>
+                                </a>
+                            @endif
+                        </div>
+                    </form>
+                </div>
+
                 <div
-                    class="bg-white dark:bg-gray-800 rounded-sm shadow-sm border border-slate-200 border border-gray-50 dark:border-gray-700/50 overflow-hidden">
-                    <div class="py-8 px-6">
+                    class="bg-white dark:bg-gray-800 rounded-md shadow-sm border border-slate-200 dark:border-gray-700/50 overflow-hidden">
+                    <div class="py-6 px-4 sm:px-6">
 
                         <div id="wadah-tabel-ajax" x-data="{
                             // 1. STATE BARU UNTUK TOGGLE
@@ -404,16 +512,16 @@
                         }">
 
                             <div
-                                class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 border-b border-gray-100 dark:border-gray-700 pb-4">
-                                <h3 id="judul-tabel" class="text-xl font-bold text-gray-900 dark:text-gray-100">
+                                class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 border-b border-slate-200 dark:border-gray-700 pb-4">
+                                <h3 id="judul-tabel"
+                                    class="text-lg sm:text-xl font-bold text-slate-900 dark:text-gray-100 uppercase tracking-wide">
                                     Daftar Pengajuan Surat (Menunggu)
                                 </h3>
 
-                                <!-- Tombol Toggle Bulk Action -->
                                 <button type="button" @click="toggleBulkMode()"
-                                    :class="isBulkMode ? 'bg-indigo-600 text-white shadow-md hover:bg-indigo-700' :
-                                        'bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600'"
-                                    class="px-4 py-2 rounded-md text-sm font-bold transition-all flex items-center gap-2 cursor-pointer">
+                                    :class="isBulkMode ? 'bg-slate-800 text-white shadow-sm hover:bg-slate-900' :
+                                        'bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600 border border-slate-200'"
+                                    class="px-4 py-2 rounded-md text-xs sm:text-sm uppercase tracking-wider font-bold transition-all flex items-center justify-center gap-2 cursor-pointer w-full sm:w-auto">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4">
@@ -442,13 +550,14 @@
                             @role('super-admin')
                                 <div id="konten-akun" class="hidden">
                                     <div
-                                        class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 border-b border-gray-100 dark:border-gray-700 pb-4">
-                                        <h3 class="text-xl font-bold text-gray-900 dark:text-gray-100">
+                                        class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 border-b border-slate-200 dark:border-gray-700 pb-4">
+                                        <h3
+                                            class="text-lg sm:text-xl font-bold text-slate-900 dark:text-gray-100 uppercase tracking-wide">
                                             Daftar Akun Pengelola
                                         </h3>
 
                                         <a href="{{ route('admin.create') }}"
-                                            class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold rounded-md shadow-sm transition-colors flex items-center justify-center gap-2">
+                                            class="px-4 py-2.5 bg-slate-900 hover:bg-slate-800 text-white text-xs uppercase tracking-wider font-bold rounded-md shadow-sm transition-colors flex items-center justify-center gap-2 w-full sm:w-auto">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor"
                                                 viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -461,27 +570,27 @@
                                     @include('table.tabelAdmin', ['admins' => $admins ?? []])
                                 </div>
                                 <div id="konten-sampah" class="hidden">
-                                    <div class="flex flex-wrap gap-2 mb-6 border-b border-gray-100 dark:border-gray-700 pb-4"
+                                    <div class="flex flex-col sm:flex-row gap-2 mb-6 border-b border-slate-200 dark:border-gray-700 pb-4 overflow-x-auto"
                                         x-data="{ subTab: localStorage.getItem('activeSubTabAdmin') || 'ditolak' }" x-init="setTimeout(() => switchSubTab(subTab), 50)">
                                         <button @click="subTab = 'ditolak'; switchSubTab('ditolak')"
                                             :class="subTab === 'ditolak' ?
-                                                'bg-rose-100 text-rose-700 dark:bg-rose-900/50 dark:text-rose-400' :
-                                                'bg-gray-50 text-gray-600 dark:bg-gray-800 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'"
-                                            class="px-4 py-2.5 rounded-md text-sm font-bold transition-all duration-200">
+                                                'bg-rose-100 text-rose-700 border border-rose-200 dark:bg-rose-900/50 dark:text-rose-400' :
+                                                'bg-white border border-slate-200 text-slate-600 dark:bg-gray-800 dark:text-gray-400 hover:bg-slate-50 dark:hover:bg-gray-700'"
+                                            class="px-4 py-2 rounded-md text-xs sm:text-sm font-bold uppercase tracking-wider transition-all duration-200 whitespace-nowrap">
                                             Surat Ditolak
                                         </button>
                                         <button @click="subTab = 'selesai'; switchSubTab('selesai')"
                                             :class="subTab === 'selesai' ?
-                                                'bg-rose-100 text-rose-700 dark:bg-rose-900/50 dark:text-rose-400' :
-                                                'bg-gray-50 text-gray-600 dark:bg-gray-800 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'"
-                                            class="px-4 py-2.5 rounded-md text-sm font-bold transition-all duration-200">
+                                                'bg-rose-100 text-rose-700 border border-rose-200 dark:bg-rose-900/50 dark:text-rose-400' :
+                                                'bg-white border border-slate-200 text-slate-600 dark:bg-gray-800 dark:text-gray-400 hover:bg-slate-50 dark:hover:bg-gray-700'"
+                                            class="px-4 py-2 rounded-md text-xs sm:text-sm font-bold uppercase tracking-wider transition-all duration-200 whitespace-nowrap">
                                             Agenda Selesai
                                         </button>
                                         <button @click="subTab = 'batal'; switchSubTab('batal')"
                                             :class="subTab === 'batal' ?
-                                                'bg-rose-100 text-rose-700 dark:bg-rose-900/50 dark:text-rose-400' :
-                                                'bg-gray-50 text-gray-600 dark:bg-gray-800 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'"
-                                            class="px-4 py-2.5 rounded-md text-sm font-bold transition-all duration-200">
+                                                'bg-rose-100 text-rose-700 border border-rose-200 dark:bg-rose-900/50 dark:text-rose-400' :
+                                                'bg-white border border-slate-200 text-slate-600 dark:bg-gray-800 dark:text-gray-400 hover:bg-slate-50 dark:hover:bg-gray-700'"
+                                            class="px-4 py-2 rounded-md text-xs sm:text-sm font-bold uppercase tracking-wider transition-all duration-200 whitespace-nowrap">
                                             Agenda Dibatalkan
                                         </button>
                                     </div>
@@ -515,7 +624,6 @@
         </main>
     </div>
 
-    <!-- Script Logika Tetap Sama -->
     <script>
         let activeMenu = 'utama';
         // Memori Penyimpanan Halaman Paginasi

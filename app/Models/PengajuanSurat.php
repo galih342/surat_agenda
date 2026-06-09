@@ -10,6 +10,7 @@ class PengajuanSurat extends Model
     use SoftDeletes;
     protected $fillable = [
         'nama_opd',
+        'email_pengirim',
         'perihal',
         'tanggal_acara',
         'jam_mulai',
