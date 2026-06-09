@@ -96,6 +96,9 @@ class DashboardController extends Controller
         // Ambil data semua admin untuk tab Manajemen Akun
         $admins = User::latest()->get();
 
+        // Ambil semua data QR Token
+        $qrTokens = \App\Models\QrToken::latest()->get();
+
         // Return View
         return view('dashboard', compact(
             'suratUtama',
@@ -109,7 +112,8 @@ class DashboardController extends Controller
             'countPending',
             'countDiterima',
             'countDitolak',
-            'admins'
+            'admins',
+            'qrTokens'
         ));
     }
 
@@ -200,5 +204,54 @@ class DashboardController extends Controller
         $linkHasilScan = route('qr.scan', ['token' => $tokenStr]);
 
         return back()->with('success_qr', $linkHasilScan);
+    }
+
+    // Memblokir Akses QR
+    // Memblokir Akses Berdasarkan Email
+    public function blokirQr($id)
+    {
+        $qr = \App\Models\QrToken::findOrFail($id);
+
+        // Jika QR sudah ada emailnya, masukkan email tersebut ke daftar blokir permanen
+        if ($qr->used_by_email) {
+            \App\Models\BlockedEmail::firstOrCreate([
+                'email' => $qr->used_by_email
+            ]);
+        }
+
+        return redirect()->back()->with('success', 'Akses email instansi berhasil diblokir secara permanen!');
+    }
+
+    // Membuka Blokir Akses Email
+    public function unblockQr($id)
+    {
+        $qr = \App\Models\QrToken::findOrFail($id);
+
+        if ($qr->used_by_email) {
+            \App\Models\BlockedEmail::where('email', $qr->used_by_email)->delete();
+        }
+
+        return redirect()->back()->with('success', 'Blokir email berhasil dibuka.');
+    }
+
+    // Menghapus Akses QR
+    public function hapusQr($id)
+    {
+        $qr = \App\Models\QrToken::findOrFail($id);
+        $qr->delete();
+        return redirect()->back()->with('success', 'QR Code berhasil dihapus permanen.');
+    }
+
+    // Menghapus Banyak QR Sekaligus (Bulk Action)
+    public function bulkHapusQr(Request $request)
+    {
+        $ids = $request->input('ids');
+
+        if ($ids && is_array($ids)) {
+            \App\Models\QrToken::whereIn('id', $ids)->delete();
+            return response()->json(['success' => true]);
+        }
+
+        return response()->json(['success' => false, 'message' => 'Tidak ada data yang dipilih'], 400);
     }
 }

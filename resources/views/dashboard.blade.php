@@ -113,6 +113,37 @@
                         Manajemen Akun
                     </button>
 
+                    <button @click="activeTab = 'kelola-akses'; switchTab('kelola-akses'); sidebarOpen = false"
+                        :class="activeTab === 'kelola-akses' ?
+                            'bg-slate-100 text-slate-900 border-l-4 border-slate-800 font-bold dark:bg-slate-800 dark:text-white dark:border-slate-400' :
+                            'text-slate-500 hover:bg-slate-50 hover:text-slate-700 dark:text-gray-400 dark:hover:bg-gray-700'"
+                        class="flex items-center w-full px-4 py-3 rounded-r-md font-semibold transition-all duration-200 group mt-1">
+                        <svg class="w-5 h-5 mr-3 transition-colors"
+                            :class="activeTab === 'kelola-akses' ? 'text-slate-800' :
+                                'text-slate-400 group-hover:text-slate-500'"
+                            fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z">
+                            </path>
+                        </svg>
+                        Kelola Akses QR
+                    </button>
+
+                    <button @click="activeTab = 'qr-gallery'; switchTab('qr-gallery'); sidebarOpen = false"
+                        :class="activeTab === 'qr-gallery' ?
+                            'bg-slate-100 text-slate-900 border-l-4 border-slate-800 font-bold dark:bg-slate-800 dark:text-white dark:border-slate-400' :
+                            'text-slate-500 hover:bg-slate-50 hover:text-slate-700 dark:text-gray-400 dark:hover:bg-gray-700'"
+                        class="flex items-center w-full px-4 py-3 rounded-r-md font-semibold transition-all duration-200 group mt-1">
+                        <svg class="w-5 h-5 mr-3 transition-colors"
+                            :class="activeTab === 'qr-gallery' ? 'text-slate-800' : 'text-slate-400 group-hover:text-slate-500'"
+                            fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z">
+                            </path>
+                        </svg>
+                        Galeri QR
+                    </button>
+
                     <p class="px-4 text-[11px] font-bold text-rose-400 uppercase tracking-wider mb-3 mt-6">Tong Sampah</p>
 
                     <button @click="activeTab = 'sampah'; switchTab('sampah'); sidebarOpen = false"
@@ -440,6 +471,7 @@
                                     this.selectedSampahSelesai = [];
                                     this.selectedSampahBatal = [];
                                     this.selectedAdmin = [];
+                                    this.selectedQr = [];
                                 }
                             },
                         
@@ -452,6 +484,7 @@
                             selectedSampahSelesai: [],
                             selectedSampahBatal: [],
                             selectedAdmin: [],
+                            selectedQr: [],
                         
                             // Fungsi Cerdas Select All
                             toggleAll(type) {
@@ -551,10 +584,6 @@
                                 <div id="konten-akun" class="hidden">
                                     <div
                                         class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 border-b border-slate-200 dark:border-gray-700 pb-4">
-                                        <h3
-                                            class="text-lg sm:text-xl font-bold text-slate-900 dark:text-gray-100 uppercase tracking-wide">
-                                            Daftar Akun Pengelola
-                                        </h3>
 
                                         <a href="{{ route('admin.create') }}"
                                             class="px-4 py-2.5 bg-slate-900 hover:bg-slate-800 text-white text-xs uppercase tracking-wider font-bold rounded-md shadow-sm transition-colors flex items-center justify-center gap-2 w-full sm:w-auto">
@@ -569,6 +598,15 @@
 
                                     @include('table.tabelAdmin', ['admins' => $admins ?? []])
                                 </div>
+
+                                <div id="konten-kelola-akses" class="hidden">
+                                    @include('table.tabelAksesQr', ['qrTokens' => $qrTokens ?? []])
+                                </div>
+
+                                <div id="konten-qr-gallery" class="hidden">
+                                    @include('table.tabelQrGallery', ['qrTokens' => $qrTokens ?? []])
+                                </div>
+
                                 <div id="konten-sampah" class="hidden">
                                     <div class="flex flex-col sm:flex-row gap-2 mb-6 border-b border-slate-200 dark:border-gray-700 pb-4 overflow-x-auto"
                                         x-data="{ subTab: localStorage.getItem('activeSubTabAdmin') || 'ditolak' }" x-init="setTimeout(() => switchSubTab(subTab), 50)">
@@ -657,12 +695,13 @@
             localStorage.setItem('activeTabAdmin', tab);
 
             // 2. Sembunyikan semua tab (DENGAN PENGECEKAN AMAN)
-            ['utama', 'diterima', 'ditolak', 'selesai', 'batal', 'sampah', 'akun'].forEach(t => {
-                let el = document.getElementById('konten-' + t);
-                if (el) { // Cuma di-hidden KALA ELEMENNYA ADA
-                    el.classList.add('hidden');
-                }
-            });
+            ['utama', 'diterima', 'ditolak', 'selesai', 'batal', 'sampah', 'akun', 'kelola-akses', 'qr-gallery'].forEach(
+                t => {
+                    let el = document.getElementById('konten-' + t);
+                    if (el) { // Cuma di-hidden KALA ELEMENNYA ADA
+                        el.classList.add('hidden');
+                    }
+                });
 
             // 3. Munculkan yang aktif
             targetEl.classList.remove('hidden');
@@ -674,7 +713,9 @@
                 'selesai': 'Riwayat Agenda Selesai',
                 'batal': 'Riwayat Agenda Dibatalkan',
                 'sampah': 'Tong Sampah: Arsip Terhapus',
-                'akun': 'Manajemen Akun Admin'
+                'akun': 'Manajemen Akun Admin',
+                'kelola-akses': 'Manajemen Akses QR',
+                'qr-gallery': 'Galeri QR Code Aktif'
             };
 
             let titleEl = document.getElementById('judul-tabel');

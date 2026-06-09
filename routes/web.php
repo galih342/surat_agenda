@@ -90,7 +90,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
     });
 
     // Tambahkan ini di dalam kelompok rute super-admin web.php
-Route::post('/dashboard/qr/generate', [DashboardController::class, 'generateQr'])->name('surat.qr-generate');
+    Route::post('/dashboard/qr/generate', [DashboardController::class, 'generateQr'])->name('surat.qr-generate');
+    Route::patch('/dashboard/qr/{id}/blokir', [DashboardController::class, 'blokirQr'])->name('qr.blokir');
+    Route::patch('/dashboard/qr/{id}/unblock', [DashboardController::class, 'unblockQr'])->name('qr.unblock');
+    Route::delete('/dashboard/qr/{id}/hapus', [DashboardController::class, 'hapusQr'])->name('qr.hapus');
+
+    // Aksi Massal (Bulk) untuk QR
+    Route::delete('/dashboard/qr/bulk/hapus', [DashboardController::class, 'bulkHapusQr'])->name('qr.bulk-hapus');
 
 });
 

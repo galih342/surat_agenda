@@ -105,7 +105,7 @@
                             OPD Pengirim</label>
                         <input type="text" name="nama_opd" id="nama_opd" required
                             class="block w-full px-4 py-3 rounded-md border-slate-300 bg-white shadow-sm hover:border-slate-400 focus:bg-white focus:border-slate-600 focus:ring-2 focus:ring-slate-500/20 transition-all duration-200 text-sm font-bold text-slate-900 placeholder-slate-400"
-                            placeholder="Contoh: Dinas Kesehatan">
+                            placeholder="Contoh: Dinas Diskominfostandi">
                     </div>
 
                     <div>

@@ -20,6 +20,13 @@ class GoogleController extends Controller
             $googleUser = Socialite::driver('google')->user();
             $emailSekarang = $googleUser->getEmail();
 
+            // --- JANTUNG KEAMANAN: CEK DAFTAR BLOKIR ---
+            $isBlocked = \App\Models\BlockedEmail::where('email', $emailSekarang)->exists();
+            if ($isBlocked) {
+                // Langsung tendang ke halaman error jika email ada di database blokir
+                return view('errors.akses_ditolak');
+            }
+
             session(['google_email' => $emailSekarang]);
 
             $token = session('current_qr_token');
