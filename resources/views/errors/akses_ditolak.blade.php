@@ -38,23 +38,46 @@
             <h1 class="text-xl sm:text-2xl font-extrabold text-slate-900 uppercase tracking-wider mb-3">Akses Ditolak
             </h1>
 
-            <p class="text-sm text-slate-500 font-medium mb-8 leading-relaxed">
-                Tautan QR Code ini telah dikunci karena sudah digunakan oleh instansi atau akun email lain. Demi
-                keamanan dokumen, satu QR Code hanya berlaku untuk satu akun pengirim.
-            </p>
-
-            <div class="bg-slate-50 border border-slate-200 rounded-lg p-5 w-full text-left shadow-inner">
-                <div class="flex items-center gap-2 mb-2">
-                    <svg class="w-4 h-4 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
-                            d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                    </svg>
-                    <p class="text-[11px] text-slate-700 font-extrabold uppercase tracking-widest">Solusi</p>
-                </div>
-                <p class="text-xs text-slate-600 font-medium leading-relaxed">
-                    Silakan hubungi Admin instansi terkait untuk meminta tautan QR Code pengajuan yang baru.
+            @if (isset($alasan) && $alasan === 'diblokir')
+                <p class="text-sm text-slate-500 font-medium mb-8 leading-relaxed">
+                    Mohon maaf, hak akses instansi Anda telah <strong class="text-rose-600">dicabut atau
+                        diblokir</strong> oleh sistem. Anda tidak diizinkan untuk mengakses portal atau mengirim dokumen
+                    saat ini.
                 </p>
-            </div>
+
+                <div class="bg-rose-50 border border-rose-200 rounded-lg p-5 w-full text-left shadow-inner">
+                    <div class="flex items-center gap-2 mb-2">
+                        <svg class="w-4 h-4 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z">
+                            </path>
+                        </svg>
+                        <p class="text-[11px] text-rose-800 font-extrabold uppercase tracking-widest">Informasi</p>
+                    </div>
+                    <p class="text-xs text-rose-700 font-medium leading-relaxed">
+                        Silakan hubungi Administrator secara langsung untuk melakukan konfirmasi terkait status
+                        pemblokiran akun Anda.
+                    </p>
+                </div>
+            @else
+                <p class="text-sm text-slate-500 font-medium mb-8 leading-relaxed">
+                    Tautan QR Code ini telah dikunci karena sudah digunakan oleh instansi atau akun email lain. Demi
+                    keamanan dokumen, satu QR Code hanya berlaku untuk satu akun pengirim.
+                </p>
+
+                <div class="bg-slate-50 border border-slate-200 rounded-lg p-5 w-full text-left shadow-inner">
+                    <div class="flex items-center gap-2 mb-2">
+                        <svg class="w-4 h-4 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <p class="text-[11px] text-slate-700 font-extrabold uppercase tracking-widest">Solusi</p>
+                    </div>
+                    <p class="text-xs text-slate-600 font-medium leading-relaxed">
+                        Silakan hubungi Admin instansi terkait untuk meminta tautan QR Code pengajuan yang baru.
+                    </p>
+                </div>
+            @endif
 
         </div>
     </div>

@@ -9,7 +9,7 @@ class PengajuanSuratController extends Controller
 {
     public function store(Request $request)
     {
-        // 1. Validasi Input Array (Perhatikan penambahan bintang * untuk validasi array)
+        // 1. Validasi Input
         $request->validate([
             'nama_opd' => 'required|string|max:255',
             'perihal' => 'required|array',
@@ -29,16 +29,12 @@ class PengajuanSuratController extends Controller
 
         // 2. Looping dan Simpan Setiap Surat
         for ($i = 0; $i < $jumlahSurat; $i++) {
-            // Cek apakah opsi "Sampai Selesai" dicentang pada kotak surat ini
             $isSampaiSelesai = isset($request->sampai_selesai_hidden[$i]) && $request->sampai_selesai_hidden[$i] == '1';
 
-            // Upload file surat ke folder storage/app/public/dokumen_surat
             $file = $request->file('surat')[$i];
-            // Tambahkan uniqid() biar kalau upload banyak file bersamaan, namanya nggak bentrok
             $namaFile = time() . '_' . uniqid() . '_' . $file->getClientOriginalName();
             $filePath = $file->storeAs('dokumen_surat', $namaFile, 'public');
 
-            // Simpan data ke database
             PengajuanSurat::create([
                 'nama_opd' => $request->nama_opd,
                 'email_pengirim' => $emailPengirim,
@@ -51,38 +47,8 @@ class PengajuanSuratController extends Controller
             ]);
         }
 
-        // 3. Eksekusi Kematian Token QR
-        $currentToken = session('current_qr_token');
-        if ($currentToken) {
-            \App\Models\QrToken::where('token', $currentToken)->update([
-                'status' => 'USED',
-                'used_by_email' => $emailPengirim
-            ]);
-            // Hapus session token agar bersih
-            session()->forget('current_qr_token');
-        }
-
-        // 4. Redirect ke rute status dengan membawa parameter email
-        return redirect()->route('surat.status', ['email' => $emailPengirim])
-            ->with('success', 'Berhasil mengirim ' . $jumlahSurat . ' dokumen agenda!');
-    }
-
-    // Fungsi Status diubah menjadi berbasis Email
-    public function status(Request $request)
-    {
-        // Ambil email dari URL
-        $emailDiUrl = $request->query('email');
-        // Ambil email asli dari Sesi Login Google
-        $emailSesi = session('google_email');
-
-        // PROTEKSI: Jika email di URL tidak sama dengan email yang sedang login, tendang!
-        if (!$emailSesi || $emailDiUrl !== $emailSesi) {
-            abort(403, 'Anda tidak diizinkan untuk melihat status surat milik akun lain.');
-        }
-
-        $surats = \App\Models\PengajuanSurat::where('email_pengirim', $emailSesi)->latest()->get();
-
-        return view('status', compact('surats', 'emailSesi'));
+        // 4. Redirect kembali ke portal (welcome) dengan membawa pesan sukses
+        return redirect()->route('surat.form')->with('success', 'Berhasil mengirim ' . $jumlahSurat . ' dokumen agenda!');
     }
 
     // Fungsi Check Status (AJAX Realtime) juga diubah berbasis Email
@@ -98,24 +64,91 @@ class PengajuanSuratController extends Controller
 
     public function form()
     {
-        // Pagar Betis 1: Wajib memiliki Token QR di Session dan Wajib ada Email Google
-        $token = session('current_qr_token');
         $email = session('google_email');
 
-        if (!$token || !$email) {
-            abort(403, 'AKSES DITOLAK: Anda wajib memindai QR Code resmi dan melakukan autentikasi Google untuk mengakses formulir ini.');
+        if (!$email) {
+            abort(403, 'Sesi Anda tidak valid. Silakan scan QR Code kembali.');
         }
 
-        // Pagar Betis 2: Pastikan token tersebut statusnya memang masih ACTIVE di database
-        $qr = \App\Models\QrToken::where('token', $token)->first();
-
-        if (!$qr || $qr->status !== 'ACTIVE') {
-            return redirect()->route('surat.status', ['email' => $email])
-                ->with('error', 'QR Code sudah kedaluwarsa atau telah digunakan.');
+        // --- PROTEKSI LAPIS 1: CEK BLOKIR ---
+        $diblokir = \App\Models\BlockedEmail::where('email', $email)->exists();
+        if ($diblokir) {
+            session()->forget(['google_email', 'current_qr_token']);
+            abort(403, 'AKSES DITOLAK: Hak akses Anda telah dicabut/diblokir oleh Admin.');
         }
 
-        // Jika lolos semua pengamanan, baru tampilkan form welcome
-        return view('welcome');
+        // --- PROTEKSI LAPIS 2: CEK TOKEN DIHAPUS/EXPIRED ---
+        $isReturningUser = \App\Models\QrToken::where('used_by_email', $email)->where('status', 'USED')->exists();
+        $tokenDiSesi = session('current_qr_token');
+        $isNewScan = \App\Models\QrToken::where('token', $tokenDiSesi)->where('status', 'ACTIVE')->exists();
+
+        if (!$isReturningUser && !$isNewScan) {
+            session()->forget(['google_email', 'current_qr_token']);
+            abort(403, 'Sesi Anda telah berakhir atau dihapus. Silakan minta/scan QR Code baru untuk masuk kembali.');
+        }
+
+        // --- PROTEKSI LAPIS 3: ONE-TIME FILL (KTP INSTANSI) ---
+        $profil = \App\Models\ProfilOpd::where('email', $email)->first();
+
+        // Jika belum bikin profil (akun benar-benar baru / habis dihapus), paksa ke halaman setup
+        if (!$profil) {
+            return redirect()->route('surat.setup');
+        }
+
+        // Jika lolos semua, ambil riwayat surat miliknya
+        $surats = \App\Models\PengajuanSurat::where('email_pengirim', $email)->latest()->get();
+
+        // Lempar ke welcome.blade.php (Nama OPD otomatis readonly dari database)
+        return view('welcome', [
+            'surats' => $surats,
+            'email' => $email,
+            'opdTerakhir' => $profil->nama_opd
+        ]);
+    }
+
+    // Fungsi Menampilkan Halaman One-Time Fill
+    public function setupOpd()
+    {
+        $email = session('google_email');
+        if (!$email)
+            abort(403, 'AKSES DITOLAK');
+
+        // PROTEKSI TOMBOL BACK: Jika sudah punya data tapi nekat balik ke halaman ini, tendang ke Portal
+        if (\App\Models\ProfilOpd::where('email', $email)->exists()) {
+            return redirect()->route('surat.form')->withErrors(['Peringatan' => 'Anda sudah menetapkan nama instansi.']);
+        }
+
+        return view('setup-opd', compact('email'));
+    }
+
+    // Fungsi Menyimpan Data OPD Permanen
+    // Fungsi Menyimpan Data OPD Permanen + Kunci Token QR langsung di sini
+    public function storeSetupOpd(Request $request)
+    {
+        $request->validate(['nama_opd' => 'required|string|max:255']);
+        $email = session('google_email');
+
+        // Proteksi Ganda (Double Submit Prevention)
+        if (\App\Models\ProfilOpd::where('email', $email)->exists()) {
+            return redirect()->route('surat.form');
+        }
+
+        // 1. Simpan KTP Instansi secara permanen
+        \App\Models\ProfilOpd::create([
+            'email' => $email,
+            'nama_opd' => $request->nama_opd
+        ]);
+
+        // 2. PINDAH KE SINI: Langsung kunci Token QR begitu selesai isi nama OPD
+        $currentToken = session('current_qr_token');
+        if ($currentToken) {
+            \App\Models\QrToken::where('token', $currentToken)->update([
+                'status' => 'USED',
+                'used_by_email' => $email
+            ]);
+        }
+
+        return redirect()->route('surat.form');
     }
 
     // Fungsi Terima Massal
@@ -193,6 +226,25 @@ class PengajuanSuratController extends Controller
         \App\Models\PengajuanSurat::withTrashed()->whereIn('id', $request->ids)->forceDelete();
 
         return response()->json(['success' => true, 'message' => 'Berhasil menghapus data permanen']);
+    }
+
+    // Fungsi untuk membatalkan pengajuan dari sisi Tamu/Instansi
+    public function batalkanOlehUser($id)
+    {
+        $email = session('google_email');
+
+        // Cari surat berdasarkan ID dan pastikan pemiliknya adalah email yang sedang login
+        $surat = \App\Models\PengajuanSurat::where('id', $id)
+            ->where('email_pengirim', $email)
+            ->firstOrFail();
+
+        // Hanya izinkan pembatalan jika statusnya masih 'menunggu'
+        if ($surat->status === 'menunggu') {
+            $surat->update(['status' => 'batal']);
+            return redirect()->route('surat.form')->with('success', 'Dokumen pengajuan berhasil dibatalkan.');
+        }
+
+        return redirect()->route('surat.form')->withErrors(['Peringatan' => 'Gagal membatalkan. Status surat mungkin sudah diproses oleh Admin.']);
     }
 
 

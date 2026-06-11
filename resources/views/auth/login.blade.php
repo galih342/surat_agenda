@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Login Pengelola - DUMMY NAME</title>
+    <title>Login Pengelola - Diskominfostandi</title>
 
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=figtree:400,500,600,700,800&display=swap" rel="stylesheet" />
@@ -23,7 +23,7 @@
             <img src="{{ asset('images/icon.png') }}" alt="Logo Instansi" class="w-16 h-16 mx-auto mb-3 object-contain">
             <h1 class="text-white text-xs font-semibold uppercase tracking-wider opacity-90">Pemerintah Kabupaten
                 Katingan</h1>
-            <h2 class="text-white text-lg sm:text-xl font-extrabold uppercase tracking-widest mt-1">DUMMY NAME</h2>
+            <h2 class="text-white text-lg sm:text-xl font-extrabold uppercase tracking-widest mt-1">Diskominfostandi</h2>
             <p class="text-slate-400 text-[10px] mt-2.5 font-bold uppercase tracking-widest">Sistem Informasi Pengajuan
                 Agenda</p>
         </div>

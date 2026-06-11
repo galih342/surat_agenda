@@ -13,7 +13,7 @@
                     class="w-12 h-12 mx-auto mb-2 object-contain">
                 <h1 class="text-white text-[10px] font-semibold uppercase tracking-widest opacity-90">Pemerintah Kab.
                     Katingan</h1>
-                <h2 class="text-white text-sm font-extrabold uppercase tracking-widest mt-1">DUMMY NAME</h2>
+                <h2 class="text-white text-sm font-extrabold uppercase tracking-widest mt-1">Diskominfostandi</h2>
             </div>
 
             <nav class="flex-1 overflow-y-auto mt-2 px-4 space-y-1" x-data="{
@@ -283,24 +283,66 @@
                                 </form>
 
                                 @if (session('success_qr'))
-                                    <div
-                                        class="mt-6 p-5 bg-slate-50 dark:bg-gray-900 border border-slate-200 dark:border-gray-700 rounded-lg flex flex-col items-center justify-center text-center shadow-inner">
-                                        <span
-                                            class="text-[9px] font-black text-emerald-700 dark:text-emerald-400 uppercase tracking-widest bg-emerald-100 dark:bg-emerald-900/50 px-2 py-1 rounded border border-emerald-200 dark:border-emerald-800 mb-4 shadow-sm">Siap
-                                            Digunakan</span>
+                                    <div class="mt-6 flex flex-col items-center">
+                                        <div id="print-modal-qr"
+                                            class="w-full max-w-[280px] bg-white p-5 rounded-lg border-2 border-slate-300 text-center shadow-sm">
+                                            <div
+                                                class="flex items-center justify-center gap-3 mb-3 pb-2 border-b-2 border-slate-800">
+                                                <img src="{{ asset('images/icon.png') }}" alt="Logo"
+                                                    class="w-7 h-7 object-contain">
+                                                <div class="text-left leading-none">
+                                                    <p
+                                                        class="text-[9px] font-bold uppercase text-slate-800 tracking-wider">
+                                                        Pemerintah Kab. Katingan</p>
+                                                    <p class="text-[11px] font-black uppercase text-slate-900 mt-0.5">
+                                                        Diskominfostandi</p>
+                                                </div>
+                                            </div>
 
-                                        <div class="p-3 bg-white rounded-md shadow-sm border border-slate-200">
-                                            <img src="https://api.qrserver.com/v1/create-qr-code/?size=160x160&data={{ urlencode(session('success_qr')) }}"
-                                                alt="QR Code Link" class="w-32 h-32 object-contain">
+                                            <p
+                                                class="text-[9px] font-black text-emerald-700 uppercase tracking-widest bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200 inline-block mb-3">
+                                                Sesi Akses Baru</p>
+
+                                            <div
+                                                class="p-2 bg-white rounded border border-slate-200 inline-block mb-3 shadow-sm">
+                                                <img src="https://api.qrserver.com/v1/create-qr-code/?size=160x160&data={{ urlencode(session('success_qr')) }}"
+                                                    alt="QR Code Link" class="w-36 h-36 object-contain">
+                                            </div>
+
+                                            <p
+                                                class="text-[8px] font-bold uppercase tracking-wider text-slate-400 leading-none mb-1">
+                                                Tautan Resmi Akses:</p>
+                                            <p
+                                                class="text-[9px] font-mono font-semibold text-slate-600 bg-slate-50 border border-slate-200 rounded p-1.5 break-all select-all">
+                                                {{ session('success_qr') }}</p>
                                         </div>
 
-                                        <p
-                                            class="text-slate-500 dark:text-gray-400 text-[10px] font-bold uppercase tracking-wider mt-5 mb-2">
-                                            Tautan Alternatif (Klik untuk Salin):</p>
-                                        <input type="text" readonly value="{{ session('success_qr') }}"
-                                            onclick="this.select(); document.execCommand('copy'); alert('Link disalin!');"
-                                            class="w-full text-[11px] font-semibold text-slate-600 dark:text-gray-300 bg-white dark:bg-gray-800 border border-slate-300 dark:border-gray-600 rounded text-center focus:ring-0 p-2.5 cursor-pointer shadow-sm hover:border-emerald-400 transition-colors"
-                                            title="Klik untuk menyalin">
+                                        <div class="w-full max-w-[280px] mt-4 flex gap-2">
+                                            <button type="button"
+                                                onclick="downloadQRCard('print-modal-qr', 'QR_Akses_Baru_OPD_Dummy')"
+                                                class="flex-1 flex justify-center items-center gap-1.5 py-2 px-3 rounded-md shadow-sm text-xs font-bold uppercase tracking-wider text-white bg-emerald-600 hover:bg-emerald-700 transition-colors cursor-pointer">
+                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor"
+                                                    viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        stroke-width="2"
+                                                        d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4">
+                                                    </path>
+                                                </svg>
+                                                Download JPG
+                                            </button>
+                                            <button type="button"
+                                                onclick="navigator.clipboard.writeText('{{ session('success_qr') }}'); alert('Link disalin!');"
+                                                class="p-2 bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 rounded-md transition-colors cursor-pointer"
+                                                title="Salin Link">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor"
+                                                    viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        stroke-width="2"
+                                                        d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m-5 10h5m-5-4h5">
+                                                    </path>
+                                                </svg>
+                                            </button>
+                                        </div>
                                     </div>
                                 @endif
                             </div>
@@ -520,27 +562,41 @@
                                 let ids = this['selected' + type.charAt(0).toUpperCase() + type.slice(1)];
                                 if (ids.length === 0) return;
                         
-                                if (!confirm(`Yakin ingin memproses ${ids.length} data yang dipilih?`)) return;
+                                if (!confirm('Yakin ingin memproses ' + ids.length + ' data yang dipilih?')) return;
                         
                                 fetch(url, {
-                                        method: 'POST',
+                                        // GANTI KE methodInput agar langsung mengirim PATCH atau DELETE
+                                        method: methodInput.toUpperCase(),
                                         headers: {
                                             'Content-Type': 'application/json',
-                                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                            'Accept': 'application/json',
+                                            'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]')?.getAttribute('content') || '{{ csrf_token() }}',
                                             'X-Requested-With': 'XMLHttpRequest'
                                         },
                                         body: JSON.stringify({
-                                            _method: methodInput,
-                                            ids: ids
+                                            ids: ids // _method sudah dihapus dari sini karena tidak berlaku di JSON
                                         })
                                     })
-                                    .then(response => response.json())
+                                    .then(response => {
+                                        if (response.status === 419 || response.status === 401) {
+                                            throw new Error('Sesi telah berakhir (419). Silakan refresh halaman (F5).');
+                                        }
+                                        if (!response.ok) {
+                                            throw new Error('Gagal menghubungi server (Error ' + response.status + ')');
+                                        }
+                                        return response.json();
+                                    })
                                     .then(data => {
                                         if (data.success) {
                                             this['selected' + type.charAt(0).toUpperCase() + type.slice(1)] = [];
                                             window.location.reload();
+                                        } else {
+                                            alert('Gagal: ' + (data.message || 'Alasan tidak diketahui'));
                                         }
-                                    }).catch(error => console.error('Gagal memproses bulk action:', error));
+                                    }).catch(error => {
+                                        console.error('Gagal memproses bulk action:', error);
+                                        alert(error.message || 'Terjadi kesalahan jaringan/sistem.');
+                                    });
                             }
                         }">
 
@@ -810,6 +866,64 @@
                 .catch(error => console.error("Gagal memuat data paginasi via AJAX:", error));
         });
 
+        // 1. Ganti CDN ke html2canvas-pro (Versi yang support warna OKLCH Tailwind)
+        const scriptHtml2Canvas = document.createElement('script');
+        scriptHtml2Canvas.src = "https://cdn.jsdelivr.net/npm/html2canvas-pro@1.5.8/dist/html2canvas-pro.min.js";
+        document.head.appendChild(scriptHtml2Canvas);
+
+        // 2. Fungsi cetak/download card QR formal
+        function downloadQRCard(elementId, filename, event = null) {
+            const element = document.getElementById(elementId);
+            if (!element) return;
+
+            if (typeof html2canvas === 'undefined') {
+                alert('Sistem sedang memuat library, silakan tunggu sebentar.');
+                return;
+            }
+
+            // Indikator Loading pada Tombol
+            let btn = null;
+            let originalText = '';
+            let textSpan = null;
+
+            if (event && event.currentTarget) {
+                btn = event.currentTarget;
+                textSpan = btn.querySelector('.btn-text');
+                if (textSpan) {
+                    originalText = textSpan.innerText;
+                    textSpan.innerText = 'Memproses...';
+                }
+                btn.disabled = true;
+            }
+
+            // Proses Render Gambar Langsung ke Canvas (Anti-OKLCH Error)
+            html2canvas(element, {
+                scale: 3, // Kualitas HD
+                useCORS: true,
+                backgroundColor: "#ffffff",
+                logging: false
+            }).then(canvas => {
+                let link = document.createElement('a');
+                link.download = filename + '.jpg';
+                link.href = canvas.toDataURL('image/jpeg', 0.95);
+                link.click();
+
+                // Kembalikan tombol seperti semula
+                if (btn && textSpan) {
+                    textSpan.innerText = originalText;
+                    btn.disabled = false;
+                }
+            }).catch(error => {
+                console.error('Gagal memproses gambar:', error);
+                alert('Terjadi kesalahan saat mengunduh gambar.');
+
+                if (btn && textSpan) {
+                    textSpan.innerText = originalText;
+                    btn.disabled = false;
+                }
+            });
+        }
+
         setInterval(function() {
             if (activeMenu === 'utama') {
                 // Ambil halaman dari memori
@@ -852,6 +966,6 @@
                         }
                     }).catch(error => console.error("Gagal ambil data utama:", error));
             }
-        }, 30000);
+        }, 5000);
     </script>
 </x-app-layout>

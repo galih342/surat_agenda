@@ -24,7 +24,7 @@ class GoogleController extends Controller
             $isBlocked = \App\Models\BlockedEmail::where('email', $emailSekarang)->exists();
             if ($isBlocked) {
                 // Langsung tendang ke halaman error jika email ada di database blokir
-                return view('errors.akses_ditolak');
+                return view('errors.akses_ditolak', ['alasan' => 'diblokir']);
             }
 
             session(['google_email' => $emailSekarang]);
@@ -39,21 +39,20 @@ class GoogleController extends Controller
             // --- JANTUNG KEAMANAN: LOCKING EMAIL ---
             if ($qr->status === 'USED') {
                 // Jika sudah dipakai, cek apakah email yang login sekarang SAMA dengan email pemakai awal
-                // Jika sudah dipakai, cek apakah email yang login sekarang SAMA dengan email pemakai awal
                 if ($qr->used_by_email !== $emailSekarang) {
                     // Tampilkan halaman blade khusus penolakan akses
-                    return view('errors.akses_ditolak');
+                    return view('errors.akses_ditolak', ['alasan' => 'terkunci']);
                 }
 
                 // Jika email cocok, bolehkan melihat status suratnya
-                return redirect()->route('surat.status', ['email' => $qr->used_by_email]);
+                return redirect()->route('surat.form');
             }
 
             // Jika status masih ACTIVE, silakan masuk ke form
             return redirect()->route('surat.form');
 
         } catch (\Exception $e) {
-            return view('errors.akses_ditolak');
+            return view('errors.akses_ditolak', ['alasan' => 'error']);
         }
     }
 }

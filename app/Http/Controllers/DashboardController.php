@@ -27,7 +27,7 @@ class DashboardController extends Controller
             });
 
         // 3. Pecah data berdasarkan status dari baseQuery yang sudah terfilter
-        $suratUtama = (clone $baseQuery)->where('status', 'pending')->latest()->paginate(10, ['*'], 'p_utama')->withQueryString();
+        $suratUtama = (clone $baseQuery)->where('status', 'menunggu')->latest()->paginate(10, ['*'], 'p_utama')->withQueryString();
         $suratDiterima = (clone $baseQuery)->where('status', 'diterima')->latest()->paginate(10, ['*'], 'p_diterima')->withQueryString();
         $suratDitolak = (clone $baseQuery)->where('status', 'ditolak')->latest()->paginate(10, ['*'], 'p_ditolak')->withQueryString();
         $suratSelesai = (clone $baseQuery)->where('status', 'selesai')->latest()->paginate(10, ['*'], 'p_selesai')->withQueryString();
@@ -235,11 +235,20 @@ class DashboardController extends Controller
     }
 
     // Menghapus Akses QR
+    // Menghapus Akses QR (Sekaligus membersihkan total profil instansi)
     public function hapusQr($id)
     {
         $qr = \App\Models\QrToken::findOrFail($id);
+
+        if ($qr->used_by_email) {
+            \App\Models\BlockedEmail::where('email', $qr->used_by_email)->delete();
+
+            // TAMBAHAN: Hapus profil OPD agar ketika diberi QR baru, dia wajib isi nama OPD dari nol lagi
+            \App\Models\ProfilOpd::where('email', $qr->used_by_email)->delete();
+        }
+
         $qr->delete();
-        return redirect()->back()->with('success', 'QR Code berhasil dihapus permanen.');
+        return redirect()->back()->with('success', 'Akun QR dan profil instansi berhasil dihapus dari sistem.');
     }
 
     // Menghapus Banyak QR Sekaligus (Bulk Action)
@@ -248,6 +257,16 @@ class DashboardController extends Controller
         $ids = $request->input('ids');
 
         if ($ids && is_array($ids)) {
+            $qrs = \App\Models\QrToken::whereIn('id', $ids)->get();
+            foreach ($qrs as $qr) {
+                if ($qr->used_by_email) {
+                    \App\Models\BlockedEmail::where('email', $qr->used_by_email)->delete();
+
+                    // TAMBAHAN: Ikut bersihkan profil OPD-nya
+                    \App\Models\ProfilOpd::where('email', $qr->used_by_email)->delete();
+                }
+            }
+
             \App\Models\QrToken::whereIn('id', $ids)->delete();
             return response()->json(['success' => true]);
         }

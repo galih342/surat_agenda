@@ -21,8 +21,15 @@ Route::get('/form-pengajuan', [PengajuanSuratController::class, 'form'])->name('
 Route::post('/simpan-surat', [PengajuanSuratController::class, 'store']);
 
 // Cek Status (Berdasarkan Email Google)
-Route::get('/pengajuan/status', [PengajuanSuratController::class, 'status'])->name('surat.status');
+// Route::get('/pengajuan/status', [PengajuanSuratController::class, 'status'])->name('surat.status');
 Route::get('/pengajuan/status/check', [PengajuanSuratController::class, 'checkStatus']);
+
+// Setup OPD (Satu kali isi)
+Route::get('/setup-opd', [PengajuanSuratController::class, 'setupOpd'])->name('surat.setup');
+Route::post('/simpan-setup-opd', [PengajuanSuratController::class, 'storeSetupOpd'])->name('surat.store-setup');
+
+// Rute untuk pengguna membatalkan suratnya sendiri
+Route::patch('/pengajuan/{id}/batalkan', [PengajuanSuratController::class, 'batalkanOlehUser'])->name('surat.batal-user');
 
 
 /*
@@ -48,17 +55,17 @@ Route::middleware(['auth', 'verified'])->group(function () {
     */
     Route::prefix('dashboard/surat')->name('surat.')->group(function () {
 
-        // Aksi Tunggal
-        Route::patch('/{id}/terima', [DashboardController::class, 'terima'])->name('terima');
-        Route::patch('/{id}/tolak', [DashboardController::class, 'tolak'])->name('tolak');
-        Route::patch('/{id}/selesai', [DashboardController::class, 'selesai'])->name('selesai');
-        Route::patch('/{id}/batal', [DashboardController::class, 'batal'])->name('batal');
-
-        // Aksi Massal (Bulk) - URL dirapikan agar selaras dengan prefix
+        // 1. Aksi Massal (Bulk) HARUS DI ATAS agar url 'bulk' tidak ditelan oleh {id}
         Route::patch('/bulk/terima', [PengajuanSuratController::class, 'bulkTerima'])->name('bulk-terima');
         Route::patch('/bulk/tolak', [PengajuanSuratController::class, 'bulkTolak'])->name('bulk-tolak');
         Route::patch('/bulk/selesai', [PengajuanSuratController::class, 'bulkSelesai'])->name('bulk-selesai');
         Route::patch('/bulk/batal', [PengajuanSuratController::class, 'bulkBatal'])->name('bulk-batal');
+
+        // 2. Aksi Tunggal HARUS DI BAWAH
+        Route::patch('/{id}/terima', [DashboardController::class, 'terima'])->name('terima');
+        Route::patch('/{id}/tolak', [DashboardController::class, 'tolak'])->name('tolak');
+        Route::patch('/{id}/selesai', [DashboardController::class, 'selesai'])->name('selesai');
+        Route::patch('/{id}/batal', [DashboardController::class, 'batal'])->name('batal');
     });
 
     /*
@@ -71,16 +78,18 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
         // Manajemen Tong Sampah (Tunggal & Bulk)
         Route::prefix('dashboard/surat')->name('surat.')->group(function () {
+
+            // Aksi Massal (BulksuperAdmin) - URL dirapikan agar selaras dengan prefix
+            Route::delete('/bulk/force', [PengajuanSuratController::class, 'bulkForceDelete'])->name('bulk-force');
+            Route::delete('/bulk/destroy', [PengajuanSuratController::class, 'bulkDestroy'])->name('bulk-destroy');
+            Route::patch('/bulk/restore', [PengajuanSuratController::class, 'bulkRestore'])->name('bulk-restore');
+
+
             // Manajemen Tong Sampah (Tunggal)
             Route::delete('/{id}', [DashboardController::class, 'destroy'])->name('destroy');
             Route::get('/sampah/view', [DashboardController::class, 'sampah'])->name('sampah');
             Route::post('/{id}/restore', [DashboardController::class, 'restore'])->name('restore');
             Route::delete('/{id}/force', [DashboardController::class, 'forceDelete'])->name('forceDelete');
-
-            // Aksi Massal (BulksuperAdmin) - URL dirapikan agar selaras dengan prefix
-            Route::delete('/bulk/destroy', [PengajuanSuratController::class, 'bulkDestroy'])->name('bulk-destroy');
-            Route::patch('/bulk/restore', [PengajuanSuratController::class, 'bulkRestore'])->name('bulk-restore');
-            Route::delete('/bulk/force', [PengajuanSuratController::class, 'bulkForceDelete'])->name('bulk-force');
         });
 
         // Manajemen Akun Admin
@@ -91,12 +100,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Tambahkan ini di dalam kelompok rute super-admin web.php
     Route::post('/dashboard/qr/generate', [DashboardController::class, 'generateQr'])->name('surat.qr-generate');
-    Route::patch('/dashboard/qr/{id}/blokir', [DashboardController::class, 'blokirQr'])->name('qr.blokir');
-    Route::patch('/dashboard/qr/{id}/unblock', [DashboardController::class, 'unblockQr'])->name('qr.unblock');
-    Route::delete('/dashboard/qr/{id}/hapus', [DashboardController::class, 'hapusQr'])->name('qr.hapus');
 
     // Aksi Massal (Bulk) untuk QR
     Route::delete('/dashboard/qr/bulk/hapus', [DashboardController::class, 'bulkHapusQr'])->name('qr.bulk-hapus');
+    Route::patch('/dashboard/qr/{id}/blokir', [DashboardController::class, 'blokirQr'])->name('qr.blokir');
+    Route::patch('/dashboard/qr/{id}/unblock', [DashboardController::class, 'unblockQr'])->name('qr.unblock');
+    Route::delete('/dashboard/qr/{id}/hapus', [DashboardController::class, 'hapusQr'])->name('qr.hapus');
 
 });
 
