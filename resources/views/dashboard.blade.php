@@ -1,5 +1,5 @@
 <x-app-layout>
-    <div x-data="{ sidebarOpen: false, filterOpen: false, qrModalOpen: {{ session()->has('success_qr') ? 'true' : 'false' }} }" class="flex h-screen overflow-hidden bg-slate-50 dark:bg-gray-900 font-sans">
+    <div x-data="{ sidebarOpen: false, filterOpen: false, qrModalOpen: {{ session()->has('success_qr') ? 'true' : 'false' }}, activeTab: localStorage.getItem('activeTabAdmin') || 'utama' }" class="flex h-screen overflow-hidden bg-slate-50 dark:bg-gray-900 font-sans">
 
         <div x-show="sidebarOpen" x-transition.opacity @click="sidebarOpen = false"
             class="fixed inset-0 bg-slate-900/60 z-20 md:hidden" style="display: none;">
@@ -16,9 +16,7 @@
                 <h2 class="text-white text-sm font-extrabold uppercase tracking-widest mt-1">Diskominfostandi</h2>
             </div>
 
-            <nav class="flex-1 overflow-y-auto mt-2 px-4 space-y-1" x-data="{
-                activeTab: localStorage.getItem('activeTabAdmin') || 'utama'
-            }" x-init="setTimeout(() => switchTab(activeTab), 50)">
+            <nav class="flex-1 overflow-y-auto mt-2 px-4 space-y-1" x-init="setTimeout(() => switchTab(activeTab), 50)">
 
                 <p class="px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-3 mt-4">Menu Utama</p>
 
@@ -95,9 +93,9 @@
                     Agenda Dibatalkan
                 </button>
 
-                @role('super-admin')
-                    <p class="px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-3 mt-6">Pengaturan</p>
 
+                <p class="px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-3 mt-6">Pengaturan</p>
+                @role('super-admin')
                     <button @click="activeTab = 'akun'; switchTab('akun'); sidebarOpen = false"
                         :class="activeTab === 'akun' ?
                             'bg-slate-100 text-slate-900 border-l-4 border-slate-800 font-bold dark:bg-slate-800 dark:text-white dark:border-slate-400' :
@@ -128,22 +126,22 @@
                         </svg>
                         Kelola Akses QR
                     </button>
-
-                    <button @click="activeTab = 'qr-gallery'; switchTab('qr-gallery'); sidebarOpen = false"
-                        :class="activeTab === 'qr-gallery' ?
-                            'bg-slate-100 text-slate-900 border-l-4 border-slate-800 font-bold dark:bg-slate-800 dark:text-white dark:border-slate-400' :
-                            'text-slate-500 hover:bg-slate-50 hover:text-slate-700 dark:text-gray-400 dark:hover:bg-gray-700'"
-                        class="flex items-center w-full px-4 py-3 rounded-r-md font-semibold transition-all duration-200 group mt-1">
-                        <svg class="w-5 h-5 mr-3 transition-colors"
-                            :class="activeTab === 'qr-gallery' ? 'text-slate-800' : 'text-slate-400 group-hover:text-slate-500'"
-                            fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z">
-                            </path>
-                        </svg>
-                        Galeri QR
-                    </button>
-
+                @endrole
+                <button @click="activeTab = 'qr-gallery'; switchTab('qr-gallery'); sidebarOpen = false"
+                    :class="activeTab === 'qr-gallery' ?
+                        'bg-slate-100 text-slate-900 border-l-4 border-slate-800 font-bold dark:bg-slate-800 dark:text-white dark:border-slate-400' :
+                        'text-slate-500 hover:bg-slate-50 hover:text-slate-700 dark:text-gray-400 dark:hover:bg-gray-700'"
+                    class="flex items-center w-full px-4 py-3 rounded-r-md font-semibold transition-all duration-200 group mt-1">
+                    <svg class="w-5 h-5 mr-3 transition-colors"
+                        :class="activeTab === 'qr-gallery' ? 'text-slate-800' : 'text-slate-400 group-hover:text-slate-500'"
+                        fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z">
+                        </path>
+                    </svg>
+                    Galeri QR
+                </button>
+                @role('super-admin')
                     <p class="px-4 text-[11px] font-bold text-rose-400 uppercase tracking-wider mb-3 mt-6">Tong Sampah</p>
 
                     <button @click="activeTab = 'sampah'; switchTab('sampah'); sidebarOpen = false"
@@ -351,17 +349,6 @@
                 </div>
 
                 <div class="flex items-center gap-4 sm:gap-6">
-
-                    @role('super-admin')
-                        <button @click="qrModalOpen = true"
-                            class="flex items-center gap-2 px-3 py-2 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800 rounded-md hover:bg-emerald-100 dark:hover:bg-emerald-900/50 transition-colors shadow-sm focus:outline-none">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4">
-                                </path>
-                            </svg>
-                            <span class="text-xs font-bold uppercase tracking-wider hidden sm:block">Akses QR</span>
-                        </button>
-                    @endrole
 
                     <div
                         class="text-right hidden sm:block border-l border-slate-200 dark:border-gray-700 pl-4 sm:pl-6">
@@ -607,17 +594,32 @@
                                     Daftar Pengajuan Surat (Menunggu)
                                 </h3>
 
-                                <button type="button" @click="toggleBulkMode()"
-                                    :class="isBulkMode ? 'bg-slate-800 text-white shadow-sm hover:bg-slate-900' :
-                                        'bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600 border border-slate-200'"
-                                    class="px-4 py-2 rounded-md text-xs sm:text-sm uppercase tracking-wider font-bold transition-all flex items-center justify-center gap-2 cursor-pointer w-full sm:w-auto">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4">
-                                        </path>
-                                    </svg>
-                                    <span x-text="isBulkMode ? 'Tutup Mode Pilih' : 'Pilih Banyak Data'"></span>
-                                </button>
+                                <div class="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+
+                                    <button type="button" x-show="activeTab === 'qr-gallery'"
+                                        @click="qrModalOpen = true" style="display: none;"
+                                        class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs sm:text-sm uppercase tracking-wider font-bold rounded-md shadow-sm transition-all flex items-center justify-center gap-2 cursor-pointer w-full sm:w-auto animate-fade-in">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor"
+                                            viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M12 4v16m8-8H4"></path>
+                                        </svg>
+                                        <span>Generate QR Baru</span>
+                                    </button>
+
+                                    <button type="button" @click="toggleBulkMode()"
+                                        :class="isBulkMode ? 'bg-slate-800 text-white shadow-sm hover:bg-slate-900' :
+                                            'bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600 border border-slate-200'"
+                                        class="px-4 py-2 rounded-md text-xs sm:text-sm uppercase tracking-wider font-bold transition-all flex items-center justify-center gap-2 cursor-pointer w-full sm:w-auto">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor"
+                                            viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4">
+                                            </path>
+                                        </svg>
+                                        <span x-text="isBulkMode ? 'Tutup Mode Pilih' : 'Pilih Banyak Data'"></span>
+                                    </button>
+                                </div>
                             </div>
 
                             <div id="konten-utama">
@@ -634,6 +636,10 @@
                             </div>
                             <div id="konten-batal" class="hidden">
                                 @include('table.tabelBatal', ['surat' => $suratBatal])
+                            </div>
+
+                            <div id="konten-qr-gallery" class="hidden">
+                                @include('table.tabelQrGallery', ['qrTokens' => $qrTokens ?? []])
                             </div>
 
                             @role('super-admin')
@@ -657,10 +663,6 @@
 
                                 <div id="konten-kelola-akses" class="hidden">
                                     @include('table.tabelAksesQr', ['qrTokens' => $qrTokens ?? []])
-                                </div>
-
-                                <div id="konten-qr-gallery" class="hidden">
-                                    @include('table.tabelQrGallery', ['qrTokens' => $qrTokens ?? []])
                                 </div>
 
                                 <div id="konten-sampah" class="hidden">
